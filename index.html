@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Application Command Center – Imam Fikri</title>
+<style>
+:root {
+  color-scheme: light;
+  --pr: #E53E3E; --pr50: #FFF5F5; --pr100: #FED7D7;
+  --bg: #F0F2F5; --wh: #fff;
+  --g50: #F9FAFB; --g100: #F3F4F6; --g200: #E5E7EB; --g300: #D1D5DB;
+  --g400: #9CA3AF; --g500: #6B7280; --g700: #374151; --g900: #111827;
+  --grn: #10B981; --grn50: #ECFDF5; --grn100: #D1FAE5; --grn800: #065F46;
+  --ylw: #F59E0B; --ylw50: #FFFBEB; --ylw100: #FEF3C7; --ylw800: #92400E;
+  --blu: #3B82F6; --blu50: #EFF6FF; --blu100: #DBEAFE; --blu800: #1E40AF;
+  --pur: #8B5CF6; --pur50: #F5F3FF; --pur100: #EDE9FE; --pur800: #5B21B6;
+  --red100: #FEE2E2; --red800: #991B1B;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--g900); display: flex; flex-direction: column; }
+
+/* ── HEADER ── */
+.hdr {
+  background: var(--wh); border-bottom: 1px solid var(--g200);
+  padding: 10px 24px; display: flex; align-items: center;
+  justify-content: space-between; position: sticky; top: 0; z-index: 20;
+  flex-shrink: 0;
+}
+.hdr-left { display: flex; align-items: center; gap: 10px; }
+.hdr-logo { width: 32px; height: 32px; background: var(--pr); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.hdr-title { font-size: 15px; font-weight: 700; }
+.hdr-sub { font-size: 11px; color: var(--g500); }
+.hdr-right { display: flex; align-items: center; gap: 8px; }
+.sync-badge { font-size: 10px; padding: 3px 9px; border-radius: 20px; font-weight: 600; }
+
+/* ── TABS ── */
+.tabs {
+  display: flex; background: var(--wh);
+  border-bottom: 1px solid var(--g200);
+  padding: 0 24px; overflow-x: auto; flex-shrink: 0;
+}
+.tab {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 18px; font-size: 13px; font-weight: 500;
+  color: var(--g500); cursor: pointer;
+  border-bottom: 2px solid transparent; transition: all .15s;
+  white-space: nowrap; user-select: none;
+}
+.tab:hover { color: var(--g700); }
+.tab.active { color: var(--pr); border-bottom-color: var(--pr); }
+
+/* ── PANELS ── */
+.panel { display: none; flex: 1; overflow-y: auto; }
+.panel.active { display: block; }
+.pg { padding: 20px 24px; width: 100%; }
+
+/* ── STATS ── */
+.stats-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 18px; }
+.stat { background: var(--wh); border: 1px solid var(--g200); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+.stat-ico { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.stat-n { font-size: 24px; font-weight: 700; line-height: 1; }
+.stat-l { font-size: 9px; color: var(--g500); text-transform: uppercase; letter-spacing: .05em; margin-top: 2px; }
+
+/* ── CARDS ── */
+.card { background: var(--wh); border: 1px solid var(--g200); border-radius: 12px; padding: 16px 18px; margin-bottom: 16px; }
+.card-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.card-title { font-size: 13px; font-weight: 600; }
+
+/* ── FORMS ── */
+.g3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.g2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+.fld { display: flex; flex-direction: column; gap: 4px; }
+.fld label { font-size: 10px; font-weight: 700; color: var(--g700); text-transform: uppercase; letter-spacing: .04em; }
+.fld input, .fld select, .fld textarea {
+  padding: 8px 10px; border: 1px solid var(--g300); border-radius: 8px;
+  font-size: 13px; color: var(--g900); background: var(--wh);
+  outline: none; transition: border-color .15s; font-family: inherit;
+}
+.fld input:focus, .fld select:focus, .fld textarea:focus { border-color: var(--pr); box-shadow: 0 0 0 3px rgba(229,62,62,.08); }
+.fld textarea { resize: vertical; min-height: 68px; }
+
+/* ── BUTTONS ── */
+.btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; font-family: inherit; }
+.btn-pr { background: var(--pr); color: white; }
+.btn-pr:hover { background: #C53030; }
+.btn-gh { background: var(--g100); color: var(--g700); }
+.btn-gh:hover { background: var(--g200); }
+.btn-grn { background: var(--grn); color: white; }
+.btn-grn:hover { background: #059669; }
+.btn-sm { padding: 5px 10px; font-size: 11px; }
+.btn-ico { background: none; border: none; cursor: pointer; color: var(--g400); padding: 5px; border-radius: 6px; display: inline-flex; align-items: center; transition: all .15s; }
+.btn-ico:hover { color: var(--pr); background: var(--pr50); }
+.form-acts { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+
+/* ── FILTERS ── */
+.fbar { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
+.fbar input, .fbar select { padding: 7px 10px; border: 1px solid var(--g300); border-radius: 8px; font-size: 12px; background: var(--wh); outline: none; font-family: inherit; color: var(--g700); }
+.fbar input { flex: 1; min-width: 140px; }
+
+/* ── TABLE ── */
+.tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.tbl th { background: var(--g50); padding: 9px 11px; text-align: left; font-size: 10px; font-weight: 700; color: var(--g500); text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--g200); }
+.tbl td { padding: 10px 11px; border-bottom: 1px solid var(--g100); vertical-align: middle; }
+.tbl tr:hover td { background: var(--g50); }
+
+/* ── BADGES ── */
+.badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+.bk { background: var(--g100); color: var(--g700); }
+.ba { background: var(--blu100); color: var(--blu800); }
+.bi { background: var(--ylw100); color: var(--ylw800); }
+.bo { background: var(--grn100); color: var(--grn800); }
+.br { background: var(--red100); color: var(--red800); }
+.bkol { background: var(--pur100); color: var(--pur800); }
+.bpm { background: var(--blu100); color: var(--blu800); }
+.bcom { background: var(--grn100); color: var(--grn800); }
+.bpar { background: var(--ylw100); color: var(--ylw800); }
+.buni { background: #FDF4FF; color: #7E22CE; }
+.bgro { background: var(--blu50); color: #1D4ED8; }
+.best { background: var(--g100); color: var(--g700); }
+.bpub { background: var(--grn50); color: #166534; }
+.bage { background: #FDF4FF; color: #6B21A8; }
+.sel-s { border: none; background: none; cursor: pointer; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; font-family: inherit; outline: none; }
+
+/* ── EMPTY ── */
+.empty { text-align: center; padding: 40px 20px; color: var(--g400); font-size: 13px; }
+
+/* ── COVER LETTER ── */
+.cl-wrap { display: grid; grid-template-columns: 420px 1fr; gap: 16px; }
+.cl-out { background: var(--g50); border: 1px solid var(--g200); border-radius: 12px; padding: 20px; font-size: 13px; line-height: 1.75; white-space: pre-wrap; min-height: 500px; position: relative; color: var(--g900); }
+.cl-ph { color: var(--g400); font-style: italic; text-align: center; padding-top: 100px; font-size: 13px; }
+.copy-abs { position: absolute; top: 10px; right: 10px; }
+
+/* ── JOB HUB ── */
+.notice { background: var(--blu50); color: #1E40AF; border-radius: 9px; padding: 10px 14px; font-size: 12px; margin-bottom: 18px; border: 1px solid var(--blu100); display: flex; align-items: flex-start; gap: 8px; }
+.rs { margin-bottom: 24px; }
+.rh { display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px; border-radius: 7px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+.pg-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 8px; }
+.pc { background: var(--wh); border: 1px solid var(--g200); border-radius: 9px; padding: 12px 14px; text-decoration: none; color: var(--g900); display: flex; flex-direction: column; gap: 3px; transition: all .15s; }
+.pc:hover { border-color: var(--pr); background: var(--pr50); transform: translateY(-1px); box-shadow: 0 3px 10px rgba(229,62,62,.1); }
+.pc-n { font-size: 12px; font-weight: 700; }
+.pc-d { font-size: 10px; color: var(--g500); }
+
+/* ── COMPANIES ── */
+.co-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+.co-card { background: var(--wh); border: 1px solid var(--g200); border-radius: 11px; padding: 14px; transition: box-shadow .15s; }
+.co-card:hover { box-shadow: 0 3px 14px rgba(0,0,0,.08); }
+.co-card.saved { border-color: var(--grn); background: var(--grn50); }
+.co-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.co-name { font-size: 13px; font-weight: 700; line-height: 1.3; }
+.co-ind { font-size: 10px; color: var(--g500); margin-top: 1px; }
+.co-roles { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.co-note { font-size: 11px; color: var(--g700); line-height: 1.5; margin-bottom: 10px; }
+.co-acts { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+
+/* ── SYNC PANEL (slide-in) ── */
+.sync-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 50; }
+.sync-overlay.open { display: flex; align-items: flex-start; justify-content: flex-end; }
+.sync-panel {
+  background: var(--wh); width: 380px; height: 100vh; overflow-y: auto;
+  padding: 24px; box-shadow: -4px 0 24px rgba(0,0,0,.12);
+  display: flex; flex-direction: column; gap: 16px;
+}
+.sync-panel h3 { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.sync-section { border: 1px solid var(--g200); border-radius: 10px; padding: 14px; }
+.sync-section h4 { font-size: 12px; font-weight: 700; color: var(--g700); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .04em; }
+.sync-status { font-size: 11px; padding: 6px 10px; border-radius: 6px; margin-top: 8px; }
+.sync-ok { background: var(--grn100); color: var(--grn800); }
+.sync-err { background: var(--red100); color: var(--red800); }
+.sync-info { background: var(--blu100); color: var(--blu800); }
+.divider { height: 1px; background: var(--g200); }
+
+/* ── SCRAPED JOBS BANNER + PANEL ── */
+.scrape-banner {
+  display: none; align-items: center; gap: 10px;
+  background: linear-gradient(90deg,#1D4ED8,#7C3AED);
+  color: #fff; padding: 8px 24px; font-size: 13px; font-weight: 500;
+  cursor: pointer; border: none; width: 100%; text-align: left;
+  transition: opacity .2s; flex-shrink: 0;
+}
+.scrape-banner.visible { display: flex; }
+.scrape-banner:hover { opacity: .9; }
+.scrape-banner-count {
+  background: rgba(255,255,255,.25); border-radius: 20px;
+  padding: 2px 10px; font-size: 11px; font-weight: 700;
+}
+.scrape-banner-dismiss {
+  margin-left: auto; background: none; border: none; color: #fff;
+  font-size: 16px; cursor: pointer; line-height: 1; padding: 2px 6px;
+}
+.scrape-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 60; }
+.scrape-overlay.open { display: flex; align-items: flex-start; justify-content: flex-end; }
+.scrape-panel {
+  background: var(--wh); width: 520px; height: 100vh; overflow-y: auto;
+  padding: 0; box-shadow: -4px 0 32px rgba(0,0,0,.15);
+  display: flex; flex-direction: column;
+}
+.scrape-panel-hdr {
+  padding: 18px 20px; border-bottom: 1px solid var(--g200);
+  display: flex; align-items: center; gap: 10px; position: sticky; top: 0;
+  background: var(--wh); z-index: 2;
+}
+.scrape-panel-hdr h3 { font-size: 15px; font-weight: 700; flex: 1; }
+.scrape-panel-body { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+.scrape-card {
+  border: 1px solid var(--g200); border-radius: 10px; padding: 14px;
+  display: flex; flex-direction: column; gap: 6px; background: var(--wh);
+  transition: border-color .15s;
+}
+.scrape-card:hover { border-color: var(--blu); }
+.scrape-card.is-new { border-left: 3px solid var(--blu); }
+.scrape-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.scrape-card-title { font-size: 13px; font-weight: 700; color: var(--g900); }
+.scrape-card-company { font-size: 12px; color: var(--g500); }
+.scrape-card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.scrape-card-actions { display: flex; gap: 6px; margin-top: 4px; }
+.scrape-filter-bar {
+  padding: 12px 20px; border-bottom: 1px solid var(--g200);
+  display: flex; gap: 8px; flex-wrap: wrap; background: var(--g50);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1200px) {
+  .co-grid { grid-template-columns: repeat(3,1fr); }
+  .pg-grid { grid-template-columns: repeat(3,1fr); }
+}
+@media (max-width: 900px) {
+  .stats-row { grid-template-columns: repeat(3,1fr); }
+  .co-grid { grid-template-columns: repeat(2,1fr); }
+  .cl-wrap { grid-template-columns: 1fr; }
+  .pg-grid { grid-template-columns: repeat(2,1fr); }
+  .g3 { grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 600px) {
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+  .g3, .g2 { grid-template-columns: 1fr; }
+  .pg-grid, .co-grid { grid-template-columns: 1fr; }
+  .pg { padding: 14px 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-logo">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+    </div>
+    <div>
+      <div class="hdr-title">Job Application Command Center</div>
+      <div class="hdr-sub">Imam Fikri · Remote Work Dashboard</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <span id="sync-status-badge" class="sync-badge" style="display:none"></span>
+    <span style="font-size:10px;color:var(--g400)" id="lu"></span>
+    <button class="btn btn-gh btn-sm" onclick="openSync()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 0 0 4.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 0 1-15.357-2m15.357 2H15"/></svg>
+      Sync
+    </button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="sw('tracker')">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg>
+    Application Tracker
+  </div>
+  <div class="tab" onclick="sw('gen')">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    Cover Letter Generator
+  </div>
+  <div class="tab" onclick="sw('jobs')">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Job Search Hub
+  </div>
+  <div class="tab" onclick="sw('cos')">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+    Indonesia Companies
+  </div>
+</div>
+
+<!-- SCRAPED JOBS BANNER -->
+<button class="scrape-banner" id="scrape-banner" onclick="openScrapePanel()">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  <span id="scrape-banner-text">New scraped jobs available</span>
+  <span class="scrape-badge" id="scrape-badge">0 new</span>
+  <button class="scrape-banner-dismiss" onclick="event.stopPropagation();dismissBanner()">✕</button>
+</button>
+
+<!-- SCRAPED JOBS PANEL OVERLAY -->
+<div class="scrape-overlay" id="scrape-overlay" onclick="if(event.target===this)closeScrapePanel()">
+  <div class="scrape-panel">
+    <div class="scrape-panel-hdr">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blu)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <h3>Scraped Jobs <span id="scrape-hdr-count" style="font-weight:400;color:var(--g500);font-size:13px"></span></h3>
+      <button class="btn btn-s" onclick="closeScrapePanel()">Close</button>
+    </div>
+    <div class="scrape-filter-bar">
+      <select id="sf-role" class="inp" style="font-size:12px;padding:5px 8px;width:auto" onchange="renderScrapeCards()">
+        <option value="">All Roles</option>
+        <option value="kol">KOL / Influencer</option>
+        <option value="community">Community</option>
+        <option value="pm">Project Manager</option>
+        <option value="partnerships">Partnerships</option>
+      </select>
+      <select id="sf-platform" class="inp" style="font-size:12px;padding:5px 8px;width:auto" onchange="renderScrapeCards()">
+        <option value="">All Platforms</option>
+        <option value="Glints">Glints</option>
+        <option value="Jobstreet">Jobstreet</option>
+        <option value="Kalibrr">Kalibrr</option>
+      </select>
+      <label style="font-size:12px;display:flex;align-items:center;gap:5px;cursor:pointer">
+        <input type="checkbox" id="sf-new" onchange="renderScrapeCards()"> New only
+      </label>
+      <button class="btn btn-s" style="margin-left:auto" onclick="addAllVisible()" title="Add all visible jobs to tracker as Bookmarked">Add All Visible</button>
+    </div>
+    <div class="scrape-panel-body" id="scrape-cards"></div>
+  </div>
+</div>
+
+<!-- TRACKER -->
+<div id="p-tracker" class="panel active"><div class="pg">
+  <div class="stats-row">
+    <div class="stat"><div class="stat-ico" style="background:var(--g100)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--g500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div><div><div class="stat-n" id="s-t">0</div><div class="stat-l">Total Applied</div></div></div>
+    <div class="stat"><div class="stat-ico" style="background:var(--blu50)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--blu)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div><div><div class="stat-n" id="s-a" style="color:var(--blu)">0</div><div class="stat-l">Awaiting</div></div></div>
+    <div class="stat"><div class="stat-ico" style="background:var(--ylw50)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ylw)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div><div class="stat-n" id="s-i" style="color:var(--ylw)">0</div><div class="stat-l">Interviews</div></div></div>
+    <div class="stat"><div class="stat-ico" style="background:var(--grn50)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--grn)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div><div class="stat-n" id="s-o" style="color:var(--grn)">0</div><div class="stat-l">Offers</div></div></div>
+    <div class="stat"><div class="stat-ico" style="background:var(--pur50)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--pur)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div><div><div class="stat-n" id="s-r" style="color:var(--pur)">0%</div><div class="stat-l">Interview Rate</div></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><div class="card-title" style="display:flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--pr)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Log New Application</div></div>
+    <div class="g3">
+      <div class="fld"><label>Job Title *</label><input id="i-ti" placeholder="e.g. Community Manager"></div>
+      <div class="fld"><label>Company *</label><input id="i-co" placeholder="e.g. Buffer"></div>
+      <div class="fld"><label>Platform</label><select id="i-pl"><option value="">— Select —</option><option>LinkedIn</option><option>Indeed</option><option>Himalayas</option><option>Remote.co</option><option>We Work Remotely</option><option>JobStreet</option><option>Glassdoor</option><option>Company Website</option><option>Referral</option><option>Other</option></select></div>
+      <div class="fld"><label>Role Type</label><select id="i-ro"><option value="">— Select —</option><option value="kol">KOL / Influencer</option><option value="pm">Project Manager</option><option value="community">Community Manager</option><option value="partnerships">Partnerships</option><option value="other">Other</option></select></div>
+      <div class="fld"><label>Status</label><select id="i-st"><option value="bookmarked">Bookmarked</option><option value="applied" selected>Applied</option><option value="interview">Interview</option><option value="offer">Offer</option><option value="rejected">Rejected</option></select></div>
+      <div class="fld"><label>Salary (USD/mo)</label><input id="i-sa" placeholder="e.g. $2,500 – $4,000"></div>
+    </div>
+    <div class="g2" style="margin-top:10px">
+      <div class="fld"><label>Job URL</label><input type="url" id="i-ur" placeholder="https://..."></div>
+      <div class="fld"><label>Notes</label><input id="i-no" placeholder="e.g. Follow up in 5 days"></div>
+    </div>
+    <div class="form-acts">
+      <button class="btn btn-gh" onclick="clr()">Clear</button>
+      <button class="btn btn-pr" onclick="addApp()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Application</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-title">All Applications</div>
+      <button class="btn btn-gh btn-sm" onclick="expCSV()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
+    </div>
+    <div class="fbar">
+      <input id="f-s" placeholder="Search jobs or companies..." oninput="rT()">
+      <select id="f-st" onchange="rT()"><option value="">All Statuses</option><option value="bookmarked">Bookmarked</option><option value="applied">Applied</option><option value="interview">Interview</option><option value="offer">Offer</option><option value="rejected">Rejected</option></select>
+      <select id="f-ro" onchange="rT()"><option value="">All Roles</option><option value="kol">KOL</option><option value="pm">PM</option><option value="community">Community</option><option value="partnerships">Partnerships</option></select>
+    </div>
+    <div id="tw"></div>
+  </div>
+</div></div>
+
+<!-- COVER LETTER -->
+<div id="p-gen" class="panel"><div class="pg">
+  <div class="cl-wrap">
+    <div><div class="card" style="margin-bottom:0">
+      <div class="card-hdr"><div class="card-title">Application Details</div></div>
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <div class="fld"><label>Role Type *</label><select id="cl-r" onchange="gl()"><option value="">— Select —</option><option value="kol">KOL / Influencer Marketing Manager</option><option value="pm">Digital Project Manager</option><option value="community">Community Manager</option><option value="partnerships">Partnerships Manager</option></select></div>
+        <div class="fld"><label>Company Name *</label><input id="cl-c" placeholder="e.g. Notion" oninput="gl()"></div>
+        <div class="fld"><label>Exact Job Title</label><input id="cl-t" placeholder="e.g. Senior Community Manager" oninput="gl()"></div>
+        <div class="fld"><label>Hiring Manager (optional)</label><input id="cl-h" placeholder="e.g. Sarah" oninput="gl()"></div>
+        <div class="fld"><label>Key Requirements from JD</label><textarea id="cl-q" rows="4" placeholder="Paste 2–3 key requirements from the JD..." oninput="gl()"></textarea></div>
+        <div class="fld"><label>Why This Company?</label><textarea id="cl-w" rows="3" placeholder="e.g. I admire how Buffer built a remote-first culture..." oninput="gl()"></textarea></div>
+      </div>
+    </div></div>
+    <div style="position:relative">
+      <div class="cl-out" id="cl-o"><div class="cl-ph">Select a role type and company to generate your tailored cover letter</div></div>
+      <div class="copy-abs"><button class="btn btn-gh btn-sm" id="cb" onclick="cpL()" style="display:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- JOB HUB -->
+<div id="p-jobs" class="panel"><div class="pg">
+  <div class="notice"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Pre-filtered searches for your 4 target roles across 6 platforms. These open the live job boards directly — new listings post every 24–48 hrs.</div>
+  <div class="rs"><div class="rh" style="background:var(--pur100);color:var(--pur800)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>KOL / Influencer Marketing</div>
+  <div class="pg-grid">
+    <a class="pc" href="https://www.linkedin.com/jobs/search/?keywords=KOL+Marketing+Manager&f_WT=2" target="_blank"><div class="pc-n">LinkedIn</div><div class="pc-d">KOL Marketing Manager · Remote</div></a>
+    <a class="pc" href="https://www.linkedin.com/jobs/search/?keywords=Influencer+Marketing+Manager&f_WT=2" target="_blank"><div class="pc-n">LinkedIn</div><div class="pc-d">Influencer Marketing Manager</div></a>
+    <a class="pc" href="https://himalayas.app/jobs?q=influencer+marketing" target="_blank"><div class="pc-n">Himalayas</div><div class="pc-d">Creator / Influencer · Remote-first</div></a>
+    <a class="pc" href="https://weworkremotely.com/remote-jobs/search?term=influencer+marketing" target="_blank"><div class="pc-n">We Work Remotely</div><div class="pc-d">Influencer / Creator Marketing</div></a>
+    <a class="pc" href="https://remote.co/remote-jobs/search/?search_keywords=influencer+marketing" target="_blank"><div class="pc-n">Remote.co</div><div class="pc-d">Influencer Marketing roles</div></a>
+    <a class="pc" href="https://www.jobstreet.co.id/en/job-search/influencer-marketing-manager-jobs/" target="_blank"><div class="pc-n">JobStreet ID</div><div class="pc-d">Indonesia local + remote</div></a>
+  </div></div>
+  <div class="rs"><div class="rh" style="background:var(--blu100);color:var(--blu800)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Digital Project Manager</div>
+  <div class="pg-grid">
+    <a class="pc" href="https://www.linkedin.com/jobs/search/?keywords=Digital+Project+Manager&f_WT=2" target="_blank"><div class="pc-n">LinkedIn</div><div class="pc-d">Digital Project Manager · Remote</div></a>
+    <a class="pc" href="https://himalayas.app/jobs?q=project+manager" target="_blank"><div class="pc-n">Himalayas</div><div class="pc-d">PM roles · Remote-first</div></a>
+    <a class="pc" href="https://weworkremotely.com/remote-jobs/search?term=project+manager" target="_blank"><div class="pc-n">We Work Remotely</div><div class="pc-d">Project Manager roles</div></a>
+    <a class="pc" href="https://remote.co/remote-jobs/search/?search_keywords=project+manager" target="_blank"><div class="pc-n">Remote.co</div><div class="pc-d">Remote PM roles</div></a>
+    <a class="pc" href="https://www.toptal.com/project-managers" target="_blank"><div class="pc-n">Toptal</div><div class="pc-d">Freelance PM · Premium USD</div></a>
+    <a class="pc" href="https://www.jobstreet.co.id/en/job-search/remote-project-manager-jobs/" target="_blank"><div class="pc-n">JobStreet ID</div><div class="pc-d">Indonesia local + remote</div></a>
+  </div></div>
+  <div class="rs"><div class="rh" style="background:var(--grn100);color:var(--grn800)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Community Manager</div>
+  <div class="pg-grid">
+    <a class="pc" href="https://www.linkedin.com/jobs/search/?keywords=Community+Manager&f_WT=2" target="_blank"><div class="pc-n">LinkedIn</div><div class="pc-d">Community Manager · Remote</div></a>
+    <a class="pc" href="https://himalayas.app/jobs?q=community+manager" target="_blank"><div class="pc-n">Himalayas</div><div class="pc-d">Community Manager · Remote-first</div></a>
+    <a class="pc" href="https://weworkremotely.com/remote-jobs/search?term=community+manager" target="_blank"><div class="pc-n">We Work Remotely</div><div class="pc-d">Community Manager roles</div></a>
+    <a class="pc" href="https://cryptojobslist.com/community" target="_blank"><div class="pc-n">Crypto Jobs List</div><div class="pc-d">Web3 Community · USD pay</div></a>
+    <a class="pc" href="https://remote.co/remote-jobs/search/?search_keywords=community+manager" target="_blank"><div class="pc-n">Remote.co</div><div class="pc-d">Remote community roles</div></a>
+    <a class="pc" href="https://www.jobstreet.co.id/en/job-search/community-manager-jobs/" target="_blank"><div class="pc-n">JobStreet ID</div><div class="pc-d">Indonesia local + remote</div></a>
+  </div></div>
+  <div class="rs"><div class="rh" style="background:var(--ylw100);color:var(--ylw800)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>Partnerships Manager</div>
+  <div class="pg-grid">
+    <a class="pc" href="https://www.linkedin.com/jobs/search/?keywords=Partnerships+Manager+APAC&f_WT=2" target="_blank"><div class="pc-n">LinkedIn</div><div class="pc-d">Partnerships APAC · Remote</div></a>
+    <a class="pc" href="https://www.linkedin.com/jobs/search/?keywords=Business+Development+Manager+APAC&f_WT=2" target="_blank"><div class="pc-n">LinkedIn</div><div class="pc-d">BD Manager APAC · Remote</div></a>
+    <a class="pc" href="https://himalayas.app/jobs?q=partnerships+manager" target="_blank"><div class="pc-n">Himalayas</div><div class="pc-d">Partnerships / BD</div></a>
+    <a class="pc" href="https://weworkremotely.com/remote-jobs/search?term=partnerships" target="_blank"><div class="pc-n">We Work Remotely</div><div class="pc-d">Partnerships roles</div></a>
+    <a class="pc" href="https://remote.co/remote-jobs/search/?search_keywords=partnerships+manager" target="_blank"><div class="pc-n">Remote.co</div><div class="pc-d">Remote partnerships roles</div></a>
+    <a class="pc" href="https://www.jobstreet.co.id/en/job-search/partnerships-manager-jobs/" target="_blank"><div class="pc-n">JobStreet ID</div><div class="pc-d">Indonesia local + remote</div></a>
+  </div></div>
+</div></div>
+
+<!-- INDONESIA COMPANIES -->
+<div id="p-cos" class="panel"><div class="pg">
+  <div class="card" style="margin-bottom:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div><div class="card-title">Target Companies · Indonesia</div><div style="font-size:11px;color:var(--g500);margin-top:2px">20 companies for your 4 role types — save the ones you want to target first</div></div>
+      <div style="display:flex;align-items:center;gap:9px">
+        <span id="saved-ct" style="font-size:11px;color:var(--grn800);font-weight:600;background:var(--grn100);padding:3px 10px;border-radius:20px;display:none"></span>
+        <select id="cf" onchange="rC()" style="padding:7px 10px;border:1px solid var(--g300);border-radius:8px;font-size:12px;background:var(--wh);outline:none;font-family:inherit;color:var(--g700)"><option value="">All Role Types</option><option value="kol">KOL / Influencer</option><option value="pm">Project Manager</option><option value="community">Community</option><option value="partnerships">Partnerships</option></select>
+      </div>
+    </div>
+  </div>
+  <div id="cg" class="co-grid"></div>
+</div></div>
+
+<!-- SYNC OVERLAY -->
+<div class="sync-overlay" id="sync-overlay" onclick="closeSync(event)">
+  <div class="sync-panel" onclick="event.stopPropagation()">
+    <h3>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--pr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 0 0 4.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 0 1-15.357-2m15.357 2H15"/></svg>
+      Cross-Device Sync
+    </h3>
+    <p style="font-size:12px;color:var(--g500);line-height:1.6">Your data syncs via a private file in your GitHub repo. Works on any device — phone, laptop, anywhere.</p>
+
+    <div class="sync-section">
+      <h4>GitHub Settings</h4>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <div class="fld"><label>GitHub Username</label><input id="gh-user" placeholder="e.g. im-kri"></div>
+        <div class="fld"><label>Repository Name</label><input id="gh-repo" placeholder="job-application-hub" value="job-application-hub"></div>
+        <div class="fld">
+          <label>Personal Access Token</label>
+          <input id="gh-token" type="password" placeholder="ghp_xxxxxxxxxxxx">
+          <span style="font-size:10px;color:var(--g400);margin-top:3px">Generate at: GitHub → Settings → Developer Settings → Personal Access Tokens → Tokens (classic) → Select <strong>repo</strong> scope</span>
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <button class="btn btn-gh" style="width:100%;justify-content:center" onclick="saveGHSettings()">Save Settings</button>
+      </div>
+      <div id="gh-settings-msg"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="sync-section">
+      <h4>Sync Data</h4>
+      <p style="font-size:11px;color:var(--g500);margin-bottom:12px;line-height:1.5">Push saves your current data to GitHub. Pull loads the latest from GitHub (useful on a new device).</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-pr" style="flex:1;justify-content:center" onclick="pushData()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Push to GitHub
+        </button>
+        <button class="btn btn-gh" style="flex:1;justify-content:center" onclick="pullData()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Pull from GitHub
+        </button>
+      </div>
+      <div id="sync-msg" style="margin-top:10px"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="sync-section">
+      <h4>Manual Backup</h4>
+      <p style="font-size:11px;color:var(--g500);margin-bottom:10px">Export your data as a JSON file, then import it on another device.</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-gh btn-sm" style="flex:1;justify-content:center" onclick="exportJSON()">Export JSON</button>
+        <label class="btn btn-gh btn-sm" style="flex:1;justify-content:center;cursor:pointer">
+          Import JSON
+          <input type="file" accept=".json" style="display:none" onchange="importJSON(event)">
+        </label>
+      </div>
+    </div>
+
+    <button class="btn btn-gh" style="width:100%;justify-content:center;margin-top:4px" onclick="closeSync()">Close</button>
+  </div>
+</div>
+
+<script>
+let apps = JSON.parse(localStorage.getItem('imam_v4_apps')||'[]');
+let saved = JSON.parse(localStorage.getItem('imam_v4_saved')||'[]');
+
+const COS=[
+  {id:'paragon',n:'Paragon Technology',ind:'Beauty / FMCG',roles:['kol'],st:'est',note:'Wardah & Make Over — one of Indonesia\'s largest influencer budgets. Regularly recruits KOL & creator partnership roles.'},
+  {id:'sociolla',n:'Sociolla',ind:'Beauty E-commerce',roles:['kol','community'],st:'gro',note:'KOL-heavy beauty marketplace. Strong content & influencer culture across social platforms.'},
+  {id:'somethinc',n:'Somethinc',ind:'Beauty D2C',roles:['kol'],st:'gro',note:'Fast-scaling local beauty brand built entirely on viral influencer strategy.'},
+  {id:'erigo',n:'Erigo',ind:'Fashion D2C',roles:['kol','community'],st:'gro',note:'Street fashion brand with active creator partnerships and growing community ecosystem.'},
+  {id:'kopken',n:'Kopi Kenangan',ind:'F&B',roles:['kol','community'],st:'uni',note:'Aggressive influencer & brand collab program. Unicorn with strong marketing budget.'},
+  {id:'ruangguru',n:'Ruangguru',ind:'EdTech',roles:['community','pm'],st:'uni',note:'Massive learner community in Indonesia. Strong PM culture and dedicated community ops team.'},
+  {id:'mekari',n:'Mekari',ind:'B2B SaaS',roles:['community','pm','partnerships'],st:'gro',note:'Community-led growth for HR & accounting SaaS. Strong product culture, active partnerships team.'},
+  {id:'alodokter',n:'Alodokter',ind:'HealthTech',roles:['community','pm'],st:'gro',note:'Largest health platform in Indonesia with 30M+ users. Active community ops hiring.'},
+  {id:'koinworks',n:'KoinWorks',ind:'Fintech',roles:['community','partnerships'],st:'gro',note:'P2P lending with active SME community. Good fit for community + partnerships combo roles.'},
+  {id:'grab',n:'Grab Indonesia',ind:'Super App',roles:['community','partnerships','pm'],st:'uni',note:'Strong driver & merchant community programs. Regional company with remote-friendly culture.'},
+  {id:'traveloka',n:'Traveloka',ind:'Travel Tech',roles:['pm','partnerships'],st:'uni',note:'Multiple active PM roles across products. Partnership-heavy in travel & lifestyle verticals.'},
+  {id:'dana',n:'DANA Indonesia',ind:'Fintech / Wallet',roles:['pm','community','partnerships'],st:'uni',note:'Digital wallet backed by Ant Group. Strong PM hiring pipeline and community teams.'},
+  {id:'xendit',n:'Xendit',ind:'Fintech / Payments',roles:['pm','partnerships'],st:'uni',note:'APAC payment infrastructure. Near-USD compensation. Strong remote work culture.'},
+  {id:'flip',n:'Flip',ind:'Fintech',roles:['pm','partnerships','community'],st:'gro',note:'Remittance & transfer startup. Great product culture, fast-growing team across all roles.'},
+  {id:'paper',n:'Paper.id',ind:'B2B SaaS',roles:['pm','partnerships'],st:'gro',note:'B2B invoicing & payments for SMEs. Lean team with high PM ownership and visibility.'},
+  {id:'halodoc',n:'Halodoc',ind:'HealthTech',roles:['partnerships','pm','community'],st:'uni',note:'Largest telehealth platform. Active partnerships team across clinic, pharma & insurance.'},
+  {id:'tiket',n:'Tiket.com',ind:'Travel / Entertainment',roles:['partnerships','pm'],st:'gro',note:'Under GoTo umbrella. Active partnership programs across entertainment & travel.'},
+  {id:'ovo',n:'OVO',ind:'Fintech / Wallet',roles:['partnerships','pm'],st:'uni',note:'Tokopedia-linked digital wallet. Strong merchant & brand partnership teams.'},
+  {id:'gudangada',n:'GudangAda',ind:'B2B Logistics',roles:['partnerships','pm'],st:'gro',note:'FMCG distribution platform expanding across APAC. Partnership-heavy business model.'},
+  {id:'blibli',n:'Blibli',ind:'E-commerce',roles:['pm','partnerships'],st:'pub',note:'Publicly listed company. Stable PM & partnerships roles, good for structured career growth.'},
+  // ── Remote / Freelance Platforms ──
+  {id:'gints',n:'Glints',ind:'Remote Work Platform',roles:['pm','community','partnerships'],st:'gro',note:'SEA\'s leading job & talent platform. Active PM, community, and partnerships roles — plus remote-first culture. Great for visibility as a job seeker AND as a hire.'},
+  // ── Agencies ──
+  {id:'socialbuzz',n:'Socialbuzz',ind:'Influencer Marketing Agency',roles:['kol','partnerships'],st:'age',note:'Indonesia\'s top influencer marketing agency. Direct KOL strategy, campaign management, and brand partnership roles. Strong fit for Imam\'s KOL background.'},
+  {id:'partipost',n:'Partipost',ind:'Influencer Marketing Platform',roles:['kol','community'],st:'age',note:'SEA influencer marketplace with Indonesia operations. UGC & micro-influencer campaigns — community and KOL ops roles available.'},
+  {id:'gushcloud',n:'Gushcloud International',ind:'Talent & KOL Agency',roles:['kol','partnerships'],st:'age',note:'Pan-SEA creator talent management agency. Hiring KOL managers and partnership leads across markets. Remote roles possible.'},
+  {id:'dentsu',n:'Dentsu Indonesia',ind:'Full-Service Agency',roles:['kol','pm','partnerships'],st:'age',note:'Global ad network with strong Indonesia presence. Digital, social, and influencer practices hire PM and KOL roles regularly.'},
+  {id:'ogilvy',n:'Ogilvy Indonesia',ind:'Creative Agency',roles:['kol','partnerships','pm'],st:'age',note:'Global creative agency. Indonesia office runs influencer & social campaigns — KOL and partnerships roles align well with Imam\'s experience.'},
+  {id:'narasi',n:'Narasi',ind:'Digital Media / Content',roles:['kol','community','partnerships'],st:'age',note:'Indonesia\'s prominent digital media brand. Strong content community, creator partnerships, and KOL collaboration programs.'},
+];
+
+const RL={kol:'KOL / Influencer',pm:'Project Manager',community:'Community Mgr',partnerships:'Partnerships'};
+const RC={kol:'bkol',pm:'bpm',community:'bcom',partnerships:'bpar'};
+const SL={bookmarked:'Bookmarked',applied:'Applied',interview:'Interview',offer:'Offer',rejected:'Rejected'};
+const SC={bookmarked:'bk',applied:'ba',interview:'bi',offer:'bo',rejected:'br'};
+const STL={uni:'Unicorn',gro:'Growth',est:'Established',pub:'Public',age:'Agency'};
+const STC={uni:'buni',gro:'bgro',est:'best',pub:'bpub',age:'bage'};
+
+function sv(){localStorage.setItem('imam_v4_apps',JSON.stringify(apps));uS();rT();lu();}
+function svC(){localStorage.setItem('imam_v4_saved',JSON.stringify(saved));rC();}
+function lu(){const n=new Date();const el=document.getElementById('lu');if(el)el.textContent='Updated '+n.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});}
+function sw(id){['tracker','gen','jobs','cos'].forEach((t,i)=>{document.querySelectorAll('.tab')[i].classList.toggle('active',t===id);document.getElementById('p-'+t).classList.toggle('active',t===id);});}
+
+function addApp(){
+  const ti=document.getElementById('i-ti').value.trim(),co=document.getElementById('i-co').value.trim();
+  if(!ti||!co){alert('Please fill in Job Title and Company.');return;}
+  apps.unshift({id:Date.now(),ti,co,pl:document.getElementById('i-pl').value,ro:document.getElementById('i-ro').value,st:document.getElementById('i-st').value,sa:document.getElementById('i-sa').value.trim(),ur:document.getElementById('i-ur').value.trim(),no:document.getElementById('i-no').value.trim(),dt:new Date().toISOString().slice(0,10)});
+  sv();clr();
+}
+function clr(){['i-ti','i-co','i-sa','i-ur','i-no'].forEach(x=>document.getElementById(x).value='');['i-pl','i-ro'].forEach(x=>document.getElementById(x).value='');document.getElementById('i-st').value='applied';}
+function delApp(id){if(confirm('Delete this application?')){apps=apps.filter(a=>a.id!==id);sv();}}
+function setS(id,v){const a=apps.find(a=>a.id===id);if(a){a.st=v;sv();}}
+
+function uS(){
+  const nb=apps.filter(a=>a.st!=='bookmarked'),iv=apps.filter(a=>a.st==='interview'||a.st==='offer');
+  document.getElementById('s-t').textContent=nb.length;
+  document.getElementById('s-a').textContent=apps.filter(a=>a.st==='applied').length;
+  document.getElementById('s-i').textContent=iv.length;
+  document.getElementById('s-o').textContent=apps.filter(a=>a.st==='offer').length;
+  document.getElementById('s-r').textContent=nb.length?Math.round(iv.length/nb.length*100)+'%':'0%';
+}
+
+function rT(){
+  const s=(document.getElementById('f-s').value||'').toLowerCase(),sf=document.getElementById('f-st').value,rf=document.getElementById('f-ro').value;
+  const f=apps.filter(a=>(!s||a.ti.toLowerCase().includes(s)||a.co.toLowerCase().includes(s))&&(!sf||a.st===sf)&&(!rf||a.ro===rf));
+  const w=document.getElementById('tw');
+  if(!f.length){w.innerHTML=`<div class="empty">${apps.length===0?'No applications yet — add your first one above!':'No results match your filters.'}</div>`;return;}
+  w.innerHTML=`<table class="tbl"><thead><tr><th>Job Title</th><th>Company</th><th>Role</th><th>Platform</th><th>Status</th><th>Salary</th><th>Date</th><th></th></tr></thead><tbody>${f.map(a=>`<tr>
+    <td><div style="font-weight:600">${a.ti}</div>${a.ur?`<a href="${a.ur}" target="_blank" style="font-size:10px;color:var(--blu);text-decoration:none">View job ↗</a>`:''} ${a.no?`<div style="font-size:10px;color:var(--g500)">${a.no}</div>`:''}</td>
+    <td style="font-weight:500">${a.co}</td>
+    <td>${a.ro?`<span class="badge ${RC[a.ro]||'bk'}">${RL[a.ro]||a.ro}</span>`:'-'}</td>
+    <td style="font-size:11px;color:var(--g500)">${a.pl||'-'}</td>
+    <td><select class="sel-s badge ${SC[a.st]}" onchange="setS(${a.id},this.value)">${Object.entries(SL).map(([v,l])=>`<option value="${v}"${a.st===v?' selected':''}>${l}</option>`).join('')}</select></td>
+    <td style="font-size:11px;white-space:nowrap">${a.sa||'-'}</td>
+    <td style="font-size:10px;color:var(--g400);white-space:nowrap">${a.dt}</td>
+    <td><button class="btn-ico" onclick="delApp(${a.id})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></td>
+  </tr>`).join('')}</tbody></table>`;
+}
+
+function expCSV(){
+  if(!apps.length){alert('Nothing to export.');return;}
+  const h=['Title','Company','Role','Platform','Status','Salary','Date','URL','Notes'];
+  const r=apps.map(a=>[a.ti,a.co,a.ro,a.pl,a.st,a.sa,a.dt,a.ur,a.no].map(v=>`"${(v||'').replace(/"/g,'""')}"`));
+  const el=document.createElement('a');el.href='data:text/csv;charset=utf-8,'+encodeURIComponent([h,...r].map(x=>x.join(',')).join('\n'));el.download='applications_imam.csv';el.click();
+}
+
+const T={
+  kol:(c,t,h,r,w)=>`Dear ${h||'Hiring Team'},\n\nI'm excited to apply for the ${t||'KOL/Influencer Marketing Manager'} role at ${c}. With over 3 years managing influencer ecosystems at scale — including building a centralized Creator Discovery Lab at HeyRCG that cut manual canvassing by 30% and maintaining a live database of 2,000+ KOLs — I bring a systematic, data-driven approach to creator partnerships that delivers measurable results.\n${r?`\nYour requirement for ${r} aligns closely with my hands-on experience.\n`:''}\nAt GoTo (Gojek Tokopedia), I built and managed 500+ annual partnerships across GoBiz, GoStore, and GoPay — reducing event costs by 60% while delivering 10,000+ annual online attendees. Managing daily outreach across 10+ brand accounts and coordinating 100+ monthly KOL visits has sharpened my ability to execute at volume without sacrificing quality.\n${w?`\n${w}\n`:''}\nI'd welcome the opportunity to discuss how my creator ecosystem experience in Southeast Asia can support ${c}'s influencer strategy.\n\nWarm regards,\nImam Risalul Fikri\nimamfikri.ir@gmail.com · +6281230332715\nlinkedin.com/in/imamfikri`,
+  pm:(c,t,h,r,w)=>`Dear ${h||'Hiring Team'},\n\nI'm applying for the ${t||'Digital Project Manager'} role at ${c}. Over the past four years, I've led end-to-end delivery of digital platforms serving tens of thousands of users — from requirement gathering and stakeholder alignment through to deployment and optimization.\n${r?`\nThe role's emphasis on ${r} maps directly to my background.\n`:''}\nAt Kadin Indonesia Institute, I managed cross-functional teams spanning technical, content, and UX — building structured reporting and weekly tracking that kept complex projects on time. At Satu Teknologi Digital, I collaborated with engineering teams to ship a platform driving 500,000+ activities in six months.\n${w?`\n${w}\n`:''}\nI bring a hands-on execution mindset with experience working alongside international stakeholders, including a US-based consultant team.\n\nWarm regards,\nImam Risalul Fikri\nimamfikri.ir@gmail.com · +6281230332715\nlinkedin.com/in/imamfikri`,
+  community:(c,t,h,r,w)=>`Dear ${h||'Hiring Team'},\n\nI'm applying for the ${t||'Community Manager'} role at ${c}. Building communities that drive real business outcomes — not just engagement metrics — is at the core of my six-year career.\n${r?`\nYour focus on ${r} is something I've navigated hands-on.\n`:''}\nAt GoTo (Gojek Tokopedia), I spearheaded the KAMUS merchant learning platform, empowering hundreds of thousands of SMEs while managing 500+ annual partnerships. Event programs I designed drew 10,000+ annual attendees and reduced community costs by 60%. At HeyRCG, I scaled KOL community operations across 10 brand accounts, building systems that let a lean team manage 100+ monthly creator touchpoints.\n${w?`\n${w}\n`:''}\nI'd love to discuss how this community-building experience can translate into growth for ${c}.\n\nWarm regards,\nImam Risalul Fikri\nimamfikri.ir@gmail.com · +6281230332715\nlinkedin.com/in/imamfikri`,
+  partnerships:(c,t,h,r,w)=>`Dear ${h||'Hiring Team'},\n\nI'm excited to apply for the ${t||'Partnerships Manager'} role at ${c}. My experience building structured, scalable partnership programs in Southeast Asia's competitive tech landscape makes me a strong fit.\n${r?`\nThe position's focus on ${r} maps directly to my background.\n`:''}\nAt GoTo, I built and managed 500+ annual partnerships — designing value-exchange models that reduced event costs by 60% while increasing output and community impact. I maintained partnership pipelines, ran performance reviews, and served as the main contact for government bodies, corporate partners, and key clients.\n${w?`\n${w}\n`:''}\nBased in Bali and available for remote collaboration across APAC time zones, I'd love to help ${c} grow its partner ecosystem.\n\nWarm regards,\nImam Risalul Fikri\nimamfikri.ir@gmail.com · +6281230332715\nlinkedin.com/in/imamfikri`
+};
+
+function gl(){
+  const ro=document.getElementById('cl-r').value,co=document.getElementById('cl-c').value.trim();
+  const o=document.getElementById('cl-o'),b=document.getElementById('cb');
+  if(!ro||!co){o.innerHTML='<div class="cl-ph">Select a role type and company to generate your tailored cover letter</div>';b.style.display='none';return;}
+  o.textContent=T[ro](co,document.getElementById('cl-t').value.trim(),document.getElementById('cl-h').value.trim(),document.getElementById('cl-q').value.trim(),document.getElementById('cl-w').value.trim());
+  b.style.display='';
+}
+function cpL(){
+  navigator.clipboard.writeText(document.getElementById('cl-o').textContent).then(()=>{
+    const b=document.getElementById('cb');b.textContent='Copied!';
+    setTimeout(()=>{b.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy';},2000);
+  });
+}
+
+function toggleSave(id){if(saved.includes(id))saved=saved.filter(x=>x!==id);else saved.push(id);svC();}
+function rC(){
+  const rf=document.getElementById('cf').value,f=rf?COS.filter(c=>c.roles.includes(rf)):COS;
+  const ct=document.getElementById('saved-ct');
+  ct.style.display=saved.length?'':'none';if(saved.length)ct.textContent=saved.length+' saved';
+  document.getElementById('cg').innerHTML=f.map(c=>{
+    const isSaved=saved.includes(c.id);
+    return `<div class="co-card${isSaved?' saved':''}">
+      <div class="co-top"><div><div class="co-name">${c.n}</div><div class="co-ind">${c.ind}</div></div><span class="badge ${STC[c.st]||'best'}" style="white-space:nowrap;flex-shrink:0">${STL[c.st]}</span></div>
+      <div class="co-roles">${c.roles.map(r=>`<span class="badge ${RC[r]||'bk'}">${RL[r]||r}</span>`).join('')}</div>
+      <div class="co-note">${c.note}</div>
+      <div class="co-acts">
+        <a href="https://www.linkedin.com/company/${c.id}/" target="_blank" class="btn btn-gh btn-sm" style="text-decoration:none"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>LinkedIn</a>
+        <button class="btn btn-sm ${isSaved?'btn-pr':'btn-gh'}" onclick="toggleSave('${c.id}')">${isSaved?'✓ Saved':'Save Target'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── SYNC ──
+function openSync(){
+  const s=getSyncSettings();
+  if(s.user)document.getElementById('gh-user').value=s.user;
+  if(s.repo)document.getElementById('gh-repo').value=s.repo;
+  if(s.token)document.getElementById('gh-token').value=s.token;
+  document.getElementById('sync-overlay').classList.add('open');
+}
+function closeSync(e){if(!e||e.target===document.getElementById('sync-overlay'))document.getElementById('sync-overlay').classList.remove('open');}
+
+function getSyncSettings(){return JSON.parse(localStorage.getItem('imam_gh_settings')||'{}');}
+function saveGHSettings(){
+  const u=document.getElementById('gh-user').value.trim(),r=document.getElementById('gh-repo').value.trim(),t=document.getElementById('gh-token').value.trim();
+  if(!u||!r||!t){showMsg('gh-settings-msg','Please fill all three fields.','err');return;}
+  localStorage.setItem('imam_gh_settings',JSON.stringify({user:u,repo:r,token:t}));
+  showMsg('gh-settings-msg','Settings saved!','ok');
+  const badge=document.getElementById('sync-status-badge');
+  badge.style.display='';badge.textContent='Sync ready';badge.style.background='var(--grn100)';badge.style.color='var(--grn800)';
+}
+
+async function pushData(){
+  const {user,repo,token}=getSyncSettings();
+  if(!user||!repo||!token){showMsg('sync-msg','Set your GitHub settings first.','err');return;}
+  showMsg('sync-msg','Pushing to GitHub...','info');
+  try{
+    const content=btoa(unescape(encodeURIComponent(JSON.stringify({apps,saved,updated:new Date().toISOString()},null,2))));
+    let sha=null;
+    try{const r=await fetch(`https://api.github.com/repos/${user}/${repo}/contents/data.json`,{headers:{'Authorization':`token ${token}`,'Accept':'application/vnd.github.v3+json'}});if(r.ok){const d=await r.json();sha=d.sha;}}catch(e){}
+    const body={message:'Sync app data '+new Date().toISOString(),content};if(sha)body.sha=sha;
+    const res=await fetch(`https://api.github.com/repos/${user}/${repo}/contents/data.json`,{method:'PUT',headers:{'Authorization':`token ${token}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(res.ok)showMsg('sync-msg','✓ Data pushed to GitHub successfully!','ok');
+    else{const e=await res.json();showMsg('sync-msg','Error: '+(e.message||'Push failed.'),'err');}
+  }catch(e){showMsg('sync-msg','Network error. Check your connection.','err');}
+}
+
+async function pullData(){
+  const {user,repo,token}=getSyncSettings();
+  if(!user||!repo||!token){showMsg('sync-msg','Set your GitHub settings first.','err');return;}
+  showMsg('sync-msg','Pulling from GitHub...','info');
+  try{
+    const res=await fetch(`https://api.github.com/repos/${user}/${repo}/contents/data.json`,{headers:{'Authorization':`token ${token}`,'Accept':'application/vnd.github.v3+json'}});
+    if(!res.ok){showMsg('sync-msg','No data file found. Push first from another device.','err');return;}
+    const file=await res.json();
+    const data=JSON.parse(decodeURIComponent(escape(atob(file.content.replace(/\n/g,'')))));
+    apps=data.apps||[];saved=data.saved||[];
+    sv();svC();
+    showMsg('sync-msg','✓ Data pulled from GitHub! Updated: '+(data.updated?new Date(data.updated).toLocaleString():'unknown'),'ok');
+  }catch(e){showMsg('sync-msg','Error loading data. Check settings.','err');}
+}
+
+function showMsg(id,msg,type){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.className='sync-status sync-'+(type==='ok'?'ok':type==='err'?'err':'info');}
+
+function exportJSON(){
+  const data={apps,saved,exported:new Date().toISOString()};
+  const el=document.createElement('a');el.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(data,null,2));el.download='job_hub_backup_'+new Date().toISOString().slice(0,10)+'.json';el.click();
+}
+function importJSON(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{const data=JSON.parse(e.target.result);apps=data.apps||[];saved=data.saved||[];sv();svC();showMsg('sync-msg','✓ Data imported successfully! ('+apps.length+' applications)','ok');}
+    catch(err){showMsg('sync-msg','Invalid JSON file.','err');}
+  };
+  reader.readAsText(file);
+}
+
+uS();rT();rC();
+
+// ── SCRAPED JOBS ────────────────────────────────────────────────────────────
+let scrapedJobs = [];
+
+const ROLE_LABELS = {kol:'KOL / Influencer',pm:'Project Manager',community:'Community Mgr',partnerships:'Partnerships'};
+const PLATFORM_COLORS = {Glints:'var(--blu)',Jobstreet:'#E55722',Kalibrr:'#00B4D8'};
+
+async function loadScrapedJobs() {
+  // Only attempt fetch when running from localhost (not from file:// or GitHub Pages)
+  if (!location.hostname.match(/^(localhost|127\.0\.0\.1)$/)) return;
+  try {
+    const res = await fetch('/scraped_jobs.json?t=' + Date.now());
+    if (!res.ok) return;
+    const data = await res.json();
+    scrapedJobs = data.jobs || [];
+    const newCount = scrapedJobs.filter(j => j.is_new).length;
+    const total = scrapedJobs.length;
+    if (total > 0) {
+      const banner = document.getElementById('scrape-banner');
+      const badge = document.getElementById('scrape-badge');
+      const text = document.getElementById('scrape-banner-text');
+      text.textContent = `${total} scraped jobs ready — scraped at ${new Date(data.scraped_at).toLocaleString('en-US',{hour:'2-digit',minute:'2-digit',month:'short',day:'numeric'})}`;
+      badge.textContent = `${newCount} new`;
+      banner.classList.add('visible');
+    }
+  } catch(e) {
+    // silently fail if no scraped_jobs.json yet
+  }
+}
+
+function getFilteredScrapeJobs() {
+  const role = document.getElementById('sf-role').value;
+  const platform = document.getElementById('sf-platform').value;
+  const newOnly = document.getElementById('sf-new').checked;
+  return scrapedJobs.filter(j =>
+    (!role || j.role_type === role) &&
+    (!platform || j.platform === platform) &&
+    (!newOnly || j.is_new)
+  );
+}
+
+function renderScrapeCards() {
+  const jobs = getFilteredScrapeJobs();
+  const el = document.getElementById('scrape-cards');
+  document.getElementById('scrape-hdr-count').textContent = `(${jobs.length} jobs)`;
+  if (!jobs.length) {
+    el.innerHTML = `<div class="empty">No jobs match the current filters.</div>`;
+    return;
+  }
+  el.innerHTML = jobs.map((j,i) => `
+    <div class="scrape-card${j.is_new?' is-new':''}">
+      <div class="scrape-card-top">
+        <div>
+          <div class="scrape-card-title">${j.title}</div>
+          <div class="scrape-card-company">${j.company}${j.location?' · '+j.location:''}</div>
+        </div>
+        ${j.is_new ? `<span class="badge" style="background:var(--blu100);color:var(--blu800);font-size:10px;padding:2px 7px">NEW</span>` : ''}
+      </div>
+      <div class="scrape-card-meta">
+        <span class="badge" style="background:#EEF2FF;color:var(--blu800)">${ROLE_LABELS[j.role_type]||j.role_type}</span>
+        <span class="badge" style="background:var(--g100);color:var(--g700)">${j.platform}</span>
+        ${j.salary ? `<span class="badge" style="background:var(--grn50);color:var(--grn800)">${j.salary}</span>` : ''}
+      </div>
+      <div class="scrape-card-actions">
+        <button class="btn btn-s" onclick="addScrapedToTracker(${i})" style="background:var(--pr);color:#fff;border:none">+ Add to Tracker</button>
+        <a class="btn btn-s" href="${j.url}" target="_blank" rel="noopener" style="text-decoration:none">View Job ↗</a>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addScrapedToTracker(filteredIndex) {
+  const jobs = getFilteredScrapeJobs();
+  const j = jobs[filteredIndex];
+  if (!j) return;
+  // Check if already added
+  const exists = apps.some(a => a.ti.toLowerCase()===j.title.toLowerCase() && a.co.toLowerCase()===j.company.toLowerCase());
+  if (exists) { alert('This job is already in your tracker.'); return; }
+  apps.unshift({
+    id: Date.now(),
+    ti: j.title,
+    co: j.company,
+    pl: j.platform,
+    ro: j.role_type,
+    st: 'bookmarked',
+    sa: j.salary || '',
+    ur: j.url || '',
+    no: `Scraped from ${j.platform} · ${j.keyword||''}`,
+    dt: new Date().toISOString().slice(0,10)
+  });
+  sv();
+  // Mark as added visually
+  j._added = true;
+  renderScrapeCards();
+  showMsg('sync-msg','✓ Job added to tracker as Bookmarked','ok');
+}
+
+function addAllVisible() {
+  const jobs = getFilteredScrapeJobs();
+  let added = 0;
+  jobs.forEach(j => {
+    const exists = apps.some(a => a.ti.toLowerCase()===j.title.toLowerCase() && a.co.toLowerCase()===j.company.toLowerCase());
+    if (!exists) {
+      apps.unshift({
+        id: Date.now() + Math.random(),
+        ti: j.title, co: j.company,
+        pl: j.platform, ro: j.role_type, st: 'bookmarked',
+        sa: j.salary||'', ur: j.url||'',
+        no: `Scraped from ${j.platform}`,
+        dt: new Date().toISOString().slice(0,10)
+      });
+      added++;
+    }
+  });
+  if (added > 0) { sv(); alert(`${added} jobs added to tracker as Bookmarked!`); }
+  else alert('All visible jobs are already in your tracker.');
+}
+
+function openScrapePanel() {
+  document.getElementById('scrape-overlay').classList.add('open');
+  renderScrapeCards();
+}
+function closeScrapePanel() {
+  document.getElementById('scrape-overlay').classList.remove('open');
+}
+function dismissBanner() {
+  document.getElementById('scrape-banner').classList.remove('visible');
+}
+
+// Auto-load scraped jobs on page load
+loadScrapedJobs();
+</script>
+</body>
+</html>
